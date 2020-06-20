@@ -11,12 +11,14 @@ public class Election extends Thread {
   private byte[] buffer;
   private DatagramPacket datagramPacket;
   private List<Node> lstNodes;
+  private Node coord;
   
 
   public Election(List<Node> lstNodes) {
     try {
       this.lstNodes = lstNodes;
       this.datagramSocket = new DatagramSocket(6000);
+      coord = maxNode(lstNodes);
       buffer = new byte[4096];
     } catch (SocketException e) {
       e.printStackTrace();
@@ -58,5 +60,16 @@ public class Election extends Thread {
   public boolean unlock() {
     mutex = false;
     return true;
+  }
+
+  public Node maxNode(List<Node> lstNode){
+    Node aux = lstNode.get(0);
+    for (Node node : lstNode) {
+      if(node.id > aux.id){
+        aux = node;
+      }
+    }
+    System.out.println(aux.id);
+    return aux;
   }
 }

@@ -16,7 +16,7 @@ public class Main {
     Election coordinator = new Election(lstNodes);
     coordinator.start();
   }
-  
+
   public static List<Node> loadFile(String nameFile, String lineCommand) throws SocketException{
     List<String> lstLines = new ArrayList<>();
     try {
@@ -45,7 +45,7 @@ public class Main {
 
     for (String nodo : lstLines) {
       String[] values = nodo.split(" ");
-      Node node = new Node(values[0], values[1], Integer.parseInt(values[2]));
+      Node node = new Node(Integer.parseInt(values[0]), values[1], Integer.parseInt(values[2]));
       lstNodes.add(node);
     }
 

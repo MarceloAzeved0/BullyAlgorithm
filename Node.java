@@ -6,13 +6,13 @@ import java.net.SocketException;
 import java.io.*;
 
 public class Node extends Thread {
-  String id;
+  int id;
   String ip;
   int port;
   DatagramSocket datagramSocket;
   Integer count;
 
-  public Node(String id, String ip, int port) throws SocketException {
+  public Node(int id, String ip, int port) throws SocketException {
     this.id = id;
     this.ip = ip;
     this.port = port;
