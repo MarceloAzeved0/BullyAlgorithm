@@ -1,7 +1,7 @@
-all:			Main.class Coordinator.class Node.class
+all:			Main.class Election.class Node.class
 
-Coordinator.class: Coordinator.java
-				@javac Coordinator.java
+Election.class: Election.java
+				@javac Election.java
 
 Node.class:     Node.java
 				@javac Node.java

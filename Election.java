@@ -2,16 +2,20 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.List;
 
-public class Coordinator extends Thread {
+public class Election extends Thread {
   private boolean mutex = false;
 
   private DatagramSocket datagramSocket;
   private byte[] buffer;
   private DatagramPacket datagramPacket;
+  private List<Node> lstNodes;
+  
 
-  public Coordinator() {
+  public Election(List<Node> lstNodes) {
     try {
+      this.lstNodes = lstNodes;
       this.datagramSocket = new DatagramSocket(6000);
       buffer = new byte[4096];
     } catch (SocketException e) {
