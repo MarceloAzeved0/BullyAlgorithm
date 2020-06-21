@@ -1,4 +1,4 @@
-all:			Main.class  Listener.class Coordinator.class Node.class
+all:			Main.class  Listener.class SendMessage.class Node.class
 
 
 Listener.class: Listener.java
@@ -7,8 +7,8 @@ Listener.class: Listener.java
 Node.class:     Node.java
 				@javac Node.java
 
-Coordinator.class:     Coordinator.java
-				@javac Coordinator.java
+SendMessage.class:     SendMessage.java
+				@javac SendMessage.java
 
 Main.class:     Main.java
 				@javac Main.java

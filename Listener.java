@@ -13,10 +13,10 @@ public class Listener extends Thread {
   Thread receiver;
   Boolean conectedCoordinator = false;
   Boolean receiveMessage = false;
-  Coordinator coordinator = null;
+  SendMessage coordinator = null;
   Long countTime = null;
   List<Node> lstNodes;
-  List<Coordinator> lstNodesWhoAnswered = new ArrayList<Coordinator>();
+  List<SendMessage> lstNodesWhoAnswered = new ArrayList<SendMessage>();
 
   public Listener(DatagramSocket socket, int id) {
     this.socket = socket;
@@ -27,7 +27,7 @@ public class Listener extends Thread {
     this.lstNodes = lstNodes;
   }
 
-  public void setNodeAsCoordinator(Coordinator coordinator) {
+  public void setNodeAsCoordinator(SendMessage coordinator) {
     this.coordinator = coordinator;
   }
 
@@ -52,7 +52,7 @@ public class Listener extends Thread {
     return aux;
   }
 
-  public void setCoordinator(Coordinator coordinator) {
+  public void setCoordinator(SendMessage coordinator) {
     this.coordinator = coordinator;
   }
 
@@ -65,14 +65,14 @@ public class Listener extends Thread {
       if(message.startsWith("ATIVO")){
         
         String idNode = message.split("-")[1];
-        Coordinator coordinator = new Coordinator(Integer.parseInt(idNode), packetAddress.toString().replace("/", ""), Integer.parseInt(packetPort.toString()));
+        SendMessage coordinator = new SendMessage(Integer.parseInt(idNode), packetAddress.toString().replace("/", ""), Integer.parseInt(packetPort.toString()));
         
         InetAddress inet = InetAddress.getByName(packetAddress.toString().replace("/", ""));
         sendMessage(this.socket, inet, Integer.parseInt(packetPort.toString()), "OK-" + this.id);
         lstNodesWhoAnswered.add(coordinator);
 
         if(lstNodesWhoAnswered.size() == lstNodes.size() - 1){
-          System.out.println("Coordenador Confirmado: " + this.coordinator);
+          System.out.println("\nCoordenador Confirmado: " + this.coordinator);
           countTime = System.currentTimeMillis();
           System.out.println("\nComeçando a contagem: " + countTime);
         }
@@ -92,7 +92,7 @@ public class Listener extends Thread {
         this.receiveMessage = true;
       }else if(message.startsWith("OK")){
         String idNode = message.split("-")[1];
-        this.coordinator = new Coordinator(Integer.parseInt(idNode), packetAddress.getHostName(), packetPort);
+        this.coordinator = new SendMessage(Integer.parseInt(idNode), packetAddress.getHostName(), packetPort);
         this.conectedCoordinator = true;
         this.receiveMessage = true;
       }
@@ -124,7 +124,7 @@ public class Listener extends Thread {
         socket.receive(datagramPacket);
         String message = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
         
-        System.out.println("\nMensagem de: " + datagramPacket.getAddress() + ":" + datagramPacket.getPort() +" - " + message);
+        System.out.println("Mensagem de: " + datagramPacket.getAddress() + ":" + datagramPacket.getPort() +" - " + message);
         processCommand(datagramPacket, message);
       } catch (Exception e) {
         // e.printStackTrace();

@@ -12,12 +12,12 @@ import java.net.SocketException;
 public class Main {
   public static void main(String[] args) throws SocketException {
     List<Node> lstNodes = loadFile(args[0], args[1]);
-    Coordinator initialCoord = maxNode(lstNodes);
+    SendMessage initialCoord = maxNode(lstNodes);
     System.out.println("Coordenador Inicial: " + initialCoord);
     startNodes(lstNodes, initialCoord);
   }
 
-  public static Coordinator maxNode(List<Node> lstNode){
+  public static SendMessage maxNode(List<Node> lstNode){
     Node aux = lstNode.get(0);
     for (Node node : lstNode) {
       if(node.id > aux.id){
@@ -25,11 +25,11 @@ public class Main {
       }
     }
 
-    Coordinator coordAux = new Coordinator(aux.id, aux.ip, aux.port);
+    SendMessage coordAux = new SendMessage(aux.id, aux.ip, aux.port);
     return coordAux;
   }
 
-  public static void startNodes(List<Node> lstNodes, Coordinator initialCoord){
+  public static void startNodes(List<Node> lstNodes, SendMessage initialCoord){
     for (Node node : lstNodes) {
       node.start();
       node.setNodeList(lstNodes, initialCoord);
