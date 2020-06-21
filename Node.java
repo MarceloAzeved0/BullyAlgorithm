@@ -3,31 +3,24 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.io.*;
-
+import java.util.List;
 public class Node extends Thread {
   int id;
   String ip;
   int port;
   DatagramSocket datagramSocket;
-  Integer countSendMessage;
-  Integer timeAsCoordinator;
   Listener listener;
-  Boolean isCoordinator;
-
+  
   public Node(int id, String ip, int port) throws SocketException {
     this.id = id;
     this.ip = ip;
     this.port = port;
     this.datagramSocket = new DatagramSocket(port);
-    this.listener = new Listener(datagramSocket);
-    this.listener.start();
-    this.isCoordinator = false;
-    countSendMessage = 0;
-    timeAsCoordinator = 0;
+    this.listener = new Listener(datagramSocket, id);
   }
 
   public void run() {
+    this.listener.start();
     System.out.println("🎈\tInitializing process #" + id);
   }
 
@@ -42,13 +35,9 @@ public class Node extends Thread {
     }
   }
 
-  public void setNodeAsCoordinator(Boolean isCoordinator){
-    this.isCoordinator = isCoordinator;
-    this.listener.setIsCoordinator(isCoordinator);
-  }
-
-  public void setCountSendMessage(Integer count){
-    this.countSendMessage = count;
+  public void setNodeList(List<Node> lstNode, Coordinator initialCoord){
+    this.listener.setLstNodes(lstNode);
+    this.listener.coordinator = initialCoord;
   }
 
   public String toString(){

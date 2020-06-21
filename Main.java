@@ -12,10 +12,28 @@ import java.net.SocketException;
 public class Main {
   public static void main(String[] args) throws SocketException {
     List<Node> lstNodes = loadFile(args[0], args[1]);
-  
-    Election election = new Election(lstNodes);
+    Coordinator initialCoord = maxNode(lstNodes);
+    System.out.println("Coordenador Inicial: " + initialCoord);
+    startNodes(lstNodes, initialCoord);
+  }
 
-    election.start();
+  public static Coordinator maxNode(List<Node> lstNode){
+    Node aux = lstNode.get(0);
+    for (Node node : lstNode) {
+      if(node.id > aux.id){
+        aux = node;
+      }
+    }
+
+    Coordinator coordAux = new Coordinator(aux.id, aux.ip, aux.port);
+    return coordAux;
+  }
+
+  public static void startNodes(List<Node> lstNodes, Coordinator initialCoord){
+    for (Node node : lstNodes) {
+      node.start();
+      node.setNodeList(lstNodes, initialCoord);
+    }
   }
 
   public static List<Node> loadFile(String nameFile, String lineCommand) throws SocketException{
@@ -47,7 +65,6 @@ public class Main {
     for (String nodo : lstLines) {
       String[] values = nodo.split(" ");
       Node node = new Node(Integer.parseInt(values[0]), values[1], Integer.parseInt(values[2]));
-      node.start();
       lstNodes.add(node);
     }
 
