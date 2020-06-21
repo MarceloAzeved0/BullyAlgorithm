@@ -80,10 +80,10 @@ public class Listener extends Thread {
 
       if(message.startsWith("CONECTADO")){
         if(System.currentTimeMillis() >= countTime + 10000){
-          System.out.println("Acabou o coordenador");
+          System.out.println("Tempo do coordenador expirado");
         }else{
           InetAddress inet = InetAddress.getByName(packetAddress.toString().replace("/", ""));
-          sendMessage(this.socket, inet, coordinator.port, "SIM MEU CARO AMIGO");
+          sendMessage(this.socket, inet, packetPort, "SIM MEU CARO AMIGO");
         }
       }
       
@@ -110,9 +110,13 @@ public class Listener extends Thread {
           sendMessage(this.socket, inet, this.coordinator.port, "ATIVO-" + this.id);
         }else if(this.coordinator.id != this.id && conectedCoordinator){
           Thread.sleep(3000);
-          this.receiveMessage = false;
-          InetAddress inet = InetAddress.getByName(coordinator.ip);
-          sendMessage(this.socket, inet, this.coordinator.port, "CONECTADO?-" + this.id);
+          if(this.receiveMessage == false){
+            System.out.println("chamar eleição");
+          }else{
+            this.receiveMessage = false;
+            InetAddress inet = InetAddress.getByName(coordinator.ip);
+            sendMessage(this.socket, inet, this.coordinator.port, "CONECTADO?-" + this.id);
+          }
         }
 
         DatagramPacket datagramPacket = new DatagramPacket(text, text.length);
@@ -122,10 +126,6 @@ public class Listener extends Thread {
         
         System.out.println("\nMensagem de: " + datagramPacket.getAddress() + ":" + datagramPacket.getPort() +" - " + message);
         processCommand(datagramPacket, message);
-        if(receiveMessage == false && this.coordinator.id != this.id){
-          System.out.println("chamar eleição");
-        }
-
       } catch (Exception e) {
         // e.printStackTrace();
       }
