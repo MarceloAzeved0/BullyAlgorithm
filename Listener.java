@@ -11,6 +11,8 @@ public class Listener extends Thread {
   DatagramSocket socket;
   int id;
   Thread receiver;
+  Boolean isWinnerFighter = false;
+  int countIsWinnerFighter = 0;
   Boolean conectedCoordinator = false;
   Boolean receiveMessage = false;
   SendMessage coordinator = null;
@@ -56,12 +58,25 @@ public class Listener extends Thread {
     this.coordinator = coordinator;
   }
 
+
+  public void callElection() throws UnknownHostException, InterruptedException {
+    // System.out.println("************** Chamando Eleição " + this.id + " ***************\n");
+    this.isWinnerFighter = true;
+    for (Node node : lstNodes) {
+      if(node.id > this.id){
+        InetAddress inet = InetAddress.getByName(node.ip.toString());
+        sendMessage(this.socket, inet, node.port, "ELEICAO");
+      }
+    }
+  }
+
   public void processCommand(DatagramPacket datagramPacket, String message)
-      throws NumberFormatException, SocketException, UnknownHostException {
+      throws NumberFormatException, SocketException, UnknownHostException, InterruptedException {
     InetAddress packetAddress = datagramPacket.getAddress();
     Integer packetPort = datagramPacket.getPort();
-      
-    if(this.coordinator.id == this.id ){
+    // System.out.println(packetAddress + ":"+ packetPort);
+    // System.out.println("Coordenador " + this.coordinator + " " + this.id + " Mensagem " + message);
+    if(this.coordinator != null && this.coordinator.id == this.id ){
       if(message.startsWith("ATIVO")){
         
         String idNode = message.split("-")[1];
@@ -72,15 +87,16 @@ public class Listener extends Thread {
         lstNodesWhoAnswered.add(coordinator);
 
         if(lstNodesWhoAnswered.size() == lstNodes.size() - 1){
-          System.out.println("\nCoordenador Confirmado: " + this.coordinator);
+          System.out.println("\n************** Coordenador Confirmado **************" + "\n" +this.coordinator);
           countTime = System.currentTimeMillis();
-          System.out.println("\nComeçando a contagem: " + countTime);
         }
       }
 
       if(message.startsWith("CONECTADO")){
         if(System.currentTimeMillis() >= countTime + 10000){
-          System.out.println("Tempo do coordenador expirado");
+          this.id = -1;
+          this.socket = null;
+          System.out.println("\nTempo do coordenador expirado\n");
         }else{
           InetAddress inet = InetAddress.getByName(packetAddress.toString().replace("/", ""));
           sendMessage(this.socket, inet, packetPort, "SIM MEU CARO AMIGO");
@@ -95,6 +111,17 @@ public class Listener extends Thread {
         this.coordinator = new SendMessage(Integer.parseInt(idNode), packetAddress.getHostName(), packetPort);
         this.conectedCoordinator = true;
         this.receiveMessage = true;
+      }else if(message.startsWith("ELEICAO")){
+        InetAddress inet = InetAddress.getByName(packetAddress.toString().replace("/", ""));
+        this.sendMessage(this.socket, inet, packetPort, "SOCONACARA-" + this.id);
+      }else if(message.startsWith("SOCONACARA")){
+        isWinnerFighter = false;
+      }else if(message.startsWith("MAIORCARADACIDADE")){
+        String idNode = message.split("-")[1];
+
+        this.coordinator = new SendMessage(Integer.parseInt(idNode), packetAddress.getHostName(), packetPort);
+        this.conectedCoordinator = true;
+        this.receiveMessage = true;
       }
     }
 
@@ -103,29 +130,50 @@ public class Listener extends Thread {
   public void run() {
     while (!Thread.currentThread().isInterrupted()) {
       try {
-        // System.out.println("meu coordenador " + this.coordinator +" no " + this.id);
-        byte[] text = new byte[1024];
-        if(this.coordinator.id != this.id && conectedCoordinator == false){
-          InetAddress inet = InetAddress.getByName(coordinator.ip);
-          sendMessage(this.socket, inet, this.coordinator.port, "ATIVO-" + this.id);
-        }else if(this.coordinator.id != this.id && conectedCoordinator){
-          Thread.sleep(3000);
-          if(this.receiveMessage == false){
-            System.out.println("chamar eleição");
-          }else{
-            this.receiveMessage = false;
-            InetAddress inet = InetAddress.getByName(coordinator.ip);
-            sendMessage(this.socket, inet, this.coordinator.port, "CONECTADO?-" + this.id);
+        if(this.id != -1){
+          if(this.isWinnerFighter){
+            if(countIsWinnerFighter < 25){
+              countIsWinnerFighter++;
+            }else{
+              this.countIsWinnerFighter = 0;
+              this.isWinnerFighter = false;
+              this.conectedCoordinator = true;
+              for (Node node : lstNodes) {
+                InetAddress inet = InetAddress.getByName(node.ip);
+                sendMessage(this.socket, inet, node.port, "MAIORCARADACIDADE-" + this.id);
+                // System.out.println(this.socket.getInetAddress().getHostName() + "shauhasu");
+                this.coordinator = new SendMessage(this.id, "localhost", this.socket.getLocalPort());
+              }
+              System.out.println("\nMaior cara da cidade: " +  this.id + "\n");
+            }
           }
-        }
 
-        DatagramPacket datagramPacket = new DatagramPacket(text, text.length);
-        socket.setSoTimeout(500);
-        socket.receive(datagramPacket);
-        String message = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
-        
-        System.out.println("Mensagem de: " + datagramPacket.getAddress() + ":" + datagramPacket.getPort() +" - " + message);
-        processCommand(datagramPacket, message);
+          // System.out.println("meu coordenador " + this.coordinator +" no " + this.id);
+          byte[] text = new byte[1024];
+          if(this.coordinator != null && this.coordinator.id != this.id && conectedCoordinator == false){
+            InetAddress inet = InetAddress.getByName(coordinator.ip);
+            sendMessage(this.socket, inet, this.coordinator.port, "ATIVO-" + this.id);
+          }else if(this.coordinator.id != this.id && this.conectedCoordinator){
+            if(this.receiveMessage == false){
+              this.conectedCoordinator = false;
+              // this.coordinator = null;
+              callElection();
+            }else{
+              Thread.sleep(3000);
+              this.receiveMessage = false;
+              InetAddress inet = InetAddress.getByName(coordinator.ip);
+              sendMessage(this.socket, inet, this.coordinator.port, "CONECTADO?-" + this.id);
+            }
+          }
+
+          DatagramPacket datagramPacket = new DatagramPacket(text, text.length);
+          socket.setSoTimeout(500);
+          socket.receive(datagramPacket);
+          String message = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
+
+          System.out.println("Mensagem de: " + datagramPacket.getAddress() + ":" + datagramPacket.getPort() +" - " + message);
+          processCommand(datagramPacket, message);
+        }
       } catch (Exception e) {
         // e.printStackTrace();
       }

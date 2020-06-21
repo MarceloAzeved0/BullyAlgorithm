@@ -1,4 +1,4 @@
 1 localhost 4400
-2 localhost 4600
-3 localhost 4800
+7 localhost 5200
+6 localhost 5400
 4 localhost 5000

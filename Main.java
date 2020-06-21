@@ -13,7 +13,7 @@ public class Main {
   public static void main(String[] args) throws SocketException {
     List<Node> lstNodes = loadFile(args[0], args[1]);
     SendMessage initialCoord = maxNode(lstNodes);
-    System.out.println("Coordenador Inicial: " + initialCoord);
+    System.out.println("Coordenador Inicial: " + initialCoord +"\n") ;
     startNodes(lstNodes, initialCoord);
   }
 
