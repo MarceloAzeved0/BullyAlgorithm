@@ -10,58 +10,49 @@ public class Node extends Thread {
   String ip;
   int port;
   DatagramSocket datagramSocket;
-  Integer count;
+  Integer countSendMessage;
+  Integer timeAsCoordinator;
+  Listener listener;
+  Boolean isCoordinator;
 
   public Node(int id, String ip, int port) throws SocketException {
     this.id = id;
     this.ip = ip;
     this.port = port;
     this.datagramSocket = new DatagramSocket(port);
-    count = 0;
+    this.listener = new Listener(datagramSocket);
+    this.listener.start();
+    this.isCoordinator = false;
+    countSendMessage = 0;
+    timeAsCoordinator = 0;
   }
 
   public void run() {
     System.out.println("🎈\tInitializing process #" + id);
   }
 
-  private boolean lock() throws IOException {
-    byte[] buffer = "lock".getBytes();
-    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(ip), 6000);
-    datagramSocket.send(packet);
-    buffer = new byte[8192];
-    while (true) {
-      try {
-        packet = new DatagramPacket(buffer, buffer.length);
-        datagramSocket.setSoTimeout(500);
-        datagramSocket.receive(packet);
-        return Boolean.parseBoolean(new String(packet.getData(), 0, packet.getLength()));
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+  public void sendMessage(DatagramSocket socket, InetAddress inetAddress, Integer port, String message) {
+    byte[] command = new byte[1024];
+    command = message.getBytes();
+
+    try {
+      socket.send(new DatagramPacket(command, command.length, inetAddress, port));
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
-  private void unlock() throws IOException {
-    byte[] buffer = "unlock".getBytes();
-    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(ip), 6000);
-    datagramSocket.send(packet);
+  public void setNodeAsCoordinator(Boolean isCoordinator){
+    this.isCoordinator = isCoordinator;
+    this.listener.setIsCoordinator(isCoordinator);
   }
 
-  public static Integer read() throws IOException {
-    String lastLine = "";
-    String currentLine;
-    BufferedReader bufferedReader = new BufferedReader(new FileReader("sharedResource.txt"));
-    while ((currentLine = bufferedReader.readLine()) != null) {
-      lastLine = currentLine;
-    }
-    bufferedReader.close();
-    return Integer.parseInt(lastLine);
+  public void setCountSendMessage(Integer count){
+    this.countSendMessage = count;
   }
 
-  public static void write(final Integer value, final String idProcess, final Integer i) throws IOException {
-    BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("sharedResource.txt", true));
-
-    bufferedWriter.write("\n".concat(String.valueOf(value)));
-    bufferedWriter.close();
+  public String toString(){
+    return "Id: " + id + " Ip: " + ip+ " Porta: " + port;
   }
+
 }

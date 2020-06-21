@@ -13,8 +13,9 @@ public class Main {
   public static void main(String[] args) throws SocketException {
     List<Node> lstNodes = loadFile(args[0], args[1]);
   
-    Election coordinator = new Election(lstNodes);
-    coordinator.start();
+    Election election = new Election(lstNodes);
+
+    election.start();
   }
 
   public static List<Node> loadFile(String nameFile, String lineCommand) throws SocketException{
@@ -46,6 +47,7 @@ public class Main {
     for (String nodo : lstLines) {
       String[] values = nodo.split(" ");
       Node node = new Node(Integer.parseInt(values[0]), values[1], Integer.parseInt(values[2]));
+      node.start();
       lstNodes.add(node);
     }
 
