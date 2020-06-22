@@ -109,7 +109,7 @@ public class Listener extends Thread {
         if(System.currentTimeMillis() >= countTime + 10000){
           System.out.println("\nTempo do coordenador expirado");
           System.out.println("Encerrando...");
-          Thread.currentThread().interrupt();;
+          Thread.currentThread().interrupt();
         }else{
           InetAddress inet = InetAddress.getByName(packetAddress.toString().replace("/", ""));
           sendMessage(this.socket, inet, packetPort, "SIM MEU CARO AMIGO");
@@ -153,10 +153,22 @@ public class Listener extends Thread {
             for (Node node : lstNodes) {
               InetAddress inet = InetAddress.getByName(node.ip);
               sendMessage(this.socket, inet, node.port, "MAIORCARADACIDADE-" + this.id);
-              // System.out.println(this.socket.getInetAddress().getHostName() + "shauhasu");
+              // System.out.println(this.socket.getInetAddress().getHostName() + " shauhasu");
               this.coordinator = new SendMessage(this.id, "localhost", this.socket.getLocalPort());
             }
             System.out.println("\nMaior cara da cidade: " +  this.id + "\n");
+
+            int nodesLessThanId = 0;
+            for (Node node : lstNodes) {
+              if(node.id < this.id){
+                nodesLessThanId++;
+              }
+            }
+            if(nodesLessThanId == 0){
+              System.out.println("Último Nodo: " + this.id);
+              System.out.println("Encerrando...");
+              Thread.currentThread().interrupt();
+            }
           }
         }
         // System.out.println("meu coordenador " + this.coordinator +" no " + this.id);
