@@ -13,6 +13,7 @@ import java.util.List;
 public class Listener extends Thread {
   DatagramSocket socket;
   int id;
+  String ip;
   Thread receiver;
   Boolean isWinnerFighter = false;
   int countIsWinnerFighter = 0;
@@ -23,9 +24,10 @@ public class Listener extends Thread {
   List<Node> lstNodes;
   List<SendMessage> lstNodesWhoAnswered = new ArrayList<SendMessage>();
 
-  public Listener(DatagramSocket socket, int id) {
+  public Listener(DatagramSocket socket, int id, String ip) {
     this.socket = socket;
     this.id = id;
+    this.ip = ip;
   }
 
   public void setLstNodes(List<Node> lstNodes) {
@@ -144,7 +146,7 @@ public class Listener extends Thread {
     while (!Thread.currentThread().isInterrupted()) {
       try {
         if(this.isWinnerFighter){
-          if(countIsWinnerFighter < 25){
+          if(countIsWinnerFighter < 10){
             countIsWinnerFighter++;
           }else{
             this.countIsWinnerFighter = 0;
@@ -153,8 +155,7 @@ public class Listener extends Thread {
             for (Node node : lstNodes) {
               InetAddress inet = InetAddress.getByName(node.ip);
               sendMessage(this.socket, inet, node.port, "MAIORCARADACIDADE-" + this.id);
-              // System.out.println(this.socket.getInetAddress().getHostName() + " shauhasu");
-              this.coordinator = new SendMessage(this.id, "localhost", this.socket.getLocalPort());
+              this.coordinator = new SendMessage(this.id, this.ip, this.socket.getLocalPort());
             }
             System.out.println("\nMaior cara da cidade: " +  this.id + "\n");
 

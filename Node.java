@@ -16,7 +16,7 @@ public class Node extends Thread {
     this.ip = ip;
     this.port = port;
     this.datagramSocket = new DatagramSocket(port);
-    this.listener = new Listener(datagramSocket, id);
+    this.listener = new Listener(datagramSocket, id, ip);
   }
 
   public void run() {
