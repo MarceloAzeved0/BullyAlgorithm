@@ -145,6 +145,19 @@ public class Listener extends Thread {
   public void run() {
     while (!Thread.currentThread().isInterrupted()) {
       try {
+        if(this.coordinator.id == this.id){
+          int nodesLessThanId = 0;
+          for (SendMessage node : lstNodes) {
+            if(node.id > this.id){
+              nodesLessThanId++;
+            }
+          }
+          if(nodesLessThanId != lstNodesWhoAnswered.size()){
+            throw new Exception("ainda não iniciaram");
+          }
+
+        }
+        
         if(this.isWinnerFighter){
           if(countIsWinnerFighter < 10){//TODO
             countIsWinnerFighter++;
@@ -155,11 +168,10 @@ public class Listener extends Thread {
             for (SendMessage node : lstNodes) {
               InetAddress inet = InetAddress.getByName(node.ip);
               sendMessage(this.socket, inet, node.port, "MAIORCARADACIDADE-" + this.id);
-              this.coordinator = new SendMessage(this.id, this.ip, this.socket.getLocalPort());
             }
+            this.coordinator = new SendMessage(this.id, this.ip, this.socket.getLocalPort());
             System.out.println("\nMaior cara da cidade: " +  this.id + "\n");
-
-
+            
             //Rever
             int nodesLessThanId = 0;
             for (SendMessage node : lstNodes) {
@@ -192,11 +204,11 @@ public class Listener extends Thread {
           }
         }
 
+        
         DatagramPacket datagramPacket = new DatagramPacket(text, text.length);
         socket.setSoTimeout(500);
         socket.receive(datagramPacket);
         String message = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
-        
         System.out.println("Mensagem de: " + datagramPacket.getAddress() + ":" + datagramPacket.getPort() +" - " + message);
         processCommand(datagramPacket, message);
         
