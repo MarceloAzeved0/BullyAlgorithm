@@ -21,7 +21,7 @@ public class Listener extends Thread {
   Boolean receiveMessage = false;
   SendMessage coordinator = null;
   Long countTime = null;
-  List<Node> lstNodes;
+  List<SendMessage> lstNodes;
   List<SendMessage> lstNodesWhoAnswered = new ArrayList<SendMessage>();
 
   public Listener(DatagramSocket socket, int id, String ip) {
@@ -30,8 +30,8 @@ public class Listener extends Thread {
     this.ip = ip;
   }
 
-  public void setLstNodes(List<Node> lstNodes) {
-    this.lstNodes = lstNodes;
+  public void setLstNodes(List<SendMessage> lSendMessages) {
+    this.lstNodes = lSendMessages;
   }
 
   public void setNodeAsCoordinator(SendMessage coordinator) {
@@ -67,7 +67,7 @@ public class Listener extends Thread {
   public void callElection() throws UnknownHostException, InterruptedException {
     // System.out.println("************** Chamando Eleição " + this.id + " ***************\n");
     this.isWinnerFighter = true;
-    for (Node node : lstNodes) {
+    for (SendMessage node : lstNodes) {
       if(node.id > this.id){
         InetAddress inet = InetAddress.getByName(node.ip.toString());
         sendMessage(this.socket, inet, node.port, "ELEICAO");
@@ -92,7 +92,7 @@ public class Listener extends Thread {
         lstNodesWhoAnswered.add(coordinator);
 
         int nodesLessThanId = 0;
-        for (Node node : lstNodes) {
+        for (SendMessage node : lstNodes) {
           if(node.id < this.id){
             nodesLessThanId++;
           }
@@ -146,21 +146,23 @@ public class Listener extends Thread {
     while (!Thread.currentThread().isInterrupted()) {
       try {
         if(this.isWinnerFighter){
-          if(countIsWinnerFighter < 10){
+          if(countIsWinnerFighter < 10){//TODO
             countIsWinnerFighter++;
           }else{
             this.countIsWinnerFighter = 0;
             this.isWinnerFighter = false;
             this.conectedCoordinator = true;
-            for (Node node : lstNodes) {
+            for (SendMessage node : lstNodes) {
               InetAddress inet = InetAddress.getByName(node.ip);
               sendMessage(this.socket, inet, node.port, "MAIORCARADACIDADE-" + this.id);
               this.coordinator = new SendMessage(this.id, this.ip, this.socket.getLocalPort());
             }
             System.out.println("\nMaior cara da cidade: " +  this.id + "\n");
 
+
+            //Rever
             int nodesLessThanId = 0;
-            for (Node node : lstNodes) {
+            for (SendMessage node : lstNodes) {
               if(node.id < this.id){
                 nodesLessThanId++;
               }

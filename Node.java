@@ -35,8 +35,8 @@ public class Node extends Thread {
     }
   }
 
-  public void setNodeList(List<Node> lstNode, SendMessage initialCoord){
-    this.listener.setLstNodes(lstNode);
+  public void setNodeList(List<SendMessage> lstSendMessage, SendMessage initialCoord){
+    this.listener.setLstNodes(lstSendMessage);
     this.listener.coordinator = initialCoord;
   }
 

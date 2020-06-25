@@ -11,15 +11,16 @@ import java.net.SocketException;
 
 public class Main {
   public static void main(String[] args) throws SocketException {
-    List<Node> lstNodes = loadFile(args[0], args[1]);
-    SendMessage initialCoord = maxNode(lstNodes);
+    List<SendMessage> lstSendMessage = loadFile(args[0], args[1]);
+    Node nodeLine = loadNode(args[0], args[1]);
+    SendMessage initialCoord = maxNode(lstSendMessage);
     System.out.println("Coordenador Inicial: " + initialCoord +"\n") ;
-    startNodes(lstNodes, initialCoord);
+    startNodes(node, initialCoord, lstSendMessage);
   }
 
-  public static SendMessage maxNode(List<Node> lstNode){
-    Node aux = lstNode.get(0);
-    for (Node node : lstNode) {
+  public static SendMessage maxNode(List<SendMessage> lstNode){
+    SendMessage aux = lstNode.get(0);
+    for (SendMessage node : lstNode) {
       if(node.id > aux.id){
         aux = node;
       }
@@ -29,14 +30,43 @@ public class Main {
     return coordAux;
   }
 
-  public static void startNodes(List<Node> lstNodes, SendMessage initialCoord){
-    for (Node node : lstNodes) {
+  public static void startNodes(Node node, SendMessage initialCoord, List<SendMessage> lstSendMessage){
       node.start();
-      node.setNodeList(lstNodes, initialCoord);
-    }
+      node.setNodeList(lstSendMessage, initialCoord);
+    
   }
 
-  public static List<Node> loadFile(String nameFile, String lineCommand) throws SocketException{
+  public static Node loadNode(String nameFile, String lineCommand) throws SocketException{
+    String lineNode = "";
+    try {
+      FileReader arq = new FileReader(nameFile);
+      BufferedReader lerArq = new BufferedReader(arq);
+ 
+      String linha = lerArq.readLine(); 
+      
+      int i = 1;
+      while (linha != null) {
+        if(i == Integer.parseInt(lineCommand)){
+         lineNode = linha;
+        }
+        i++;
+        linha = lerArq.readLine(); 
+      }
+      
+      arq.close();
+    } catch (IOException e) {
+        System.err.printf("Erro na abertura do arquivo: %s.\n",
+          e.getMessage());
+    }
+    
+    
+    String[] values = lineNode.split(" ");
+    Node node = new Node(Integer.parseInt(values[0]), values[1], Integer.parseInt(values[2]));
+    
+    return node;
+  }
+
+  public static List<SendMessage> loadFile(String nameFile, String lineCommand) throws SocketException{
     List<String> lstLines = new ArrayList<>();
     try {
       FileReader arq = new FileReader(nameFile);
@@ -60,14 +90,14 @@ public class Main {
           e.getMessage());
     }
     
-    List<Node> lstNodes = new ArrayList<>();
+    List<SendMessage> lstSendMessage = new ArrayList<>();
 
     for (String nodo : lstLines) {
       String[] values = nodo.split(" ");
-      Node node = new Node(Integer.parseInt(values[0]), values[1], Integer.parseInt(values[2]));
-      lstNodes.add(node);
+      SendMessage node = new SendMessage(Integer.parseInt(values[0]), values[1], Integer.parseInt(values[2]));
+      lstSendMessage.add(node);
     }
 
-    return lstNodes;
+    return lstSendMessage;
   }
 }
