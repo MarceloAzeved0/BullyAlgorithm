@@ -145,19 +145,6 @@ public class Listener extends Thread {
   public void run() {
     while (!Thread.currentThread().isInterrupted()) {
       try {
-        if(this.coordinator.id == this.id){
-          int nodesLessThanId = 0;
-          for (SendMessage node : lstNodes) {
-            if(node.id > this.id){
-              nodesLessThanId++;
-            }
-          }
-          if(nodesLessThanId != lstNodesWhoAnswered.size()){
-            throw new Exception("ainda não iniciaram");
-          }
-
-        }
-        
         if(this.isWinnerFighter){
           if(countIsWinnerFighter < 10){//TODO
             countIsWinnerFighter++;
