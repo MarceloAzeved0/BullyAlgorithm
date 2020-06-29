@@ -70,6 +70,7 @@ public class Listener extends Thread {
     for (SendMessage node : lstNodes) {
       if(node.id > this.id){
         InetAddress inet = InetAddress.getByName(node.ip.toString());
+        System.out.println("e " + node.ip + ":" + node.port);
         sendMessage(this.socket, inet, node.port, "ELEICAO");
       }
     }
@@ -109,8 +110,7 @@ public class Listener extends Thread {
 
       if(message.startsWith("CONECTADO")){
         if(System.currentTimeMillis() >= countTime + 10000){
-          System.out.println("\nTempo do coordenador expirado");
-          System.out.println("Encerrando...");
+          System.out.println("\nT - " + this.id);
           Thread.currentThread().interrupt();
         }else{
           InetAddress inet = InetAddress.getByName(packetAddress.toString().replace("/", ""));
@@ -131,9 +131,9 @@ public class Listener extends Thread {
         this.sendMessage(this.socket, inet, packetPort, "SOCONACARA-" + this.id);
       }else if(message.startsWith("SOCONACARA")){
         isWinnerFighter = false;
-      }else if(message.startsWith("MAIORCARADACIDADE")){
+      }else if(message.startsWith("C")){
         String idNode = message.split("-")[1];
-
+        System.out.println("Mensagem: " + message);
         this.coordinator = new SendMessage(Integer.parseInt(idNode), packetAddress.getHostName(), packetPort);
         this.conectedCoordinator = true;
         this.receiveMessage = true;
@@ -146,7 +146,7 @@ public class Listener extends Thread {
     while (!Thread.currentThread().isInterrupted()) {
       try {
         if(this.isWinnerFighter){
-          if(countIsWinnerFighter < 10){//TODO
+          if(countIsWinnerFighter < lstNodes.size()){//TODO
             countIsWinnerFighter++;
           }else{
             this.countIsWinnerFighter = 0;
@@ -154,7 +154,7 @@ public class Listener extends Thread {
             this.conectedCoordinator = true;
             for (SendMessage node : lstNodes) {
               InetAddress inet = InetAddress.getByName(node.ip);
-              sendMessage(this.socket, inet, node.port, "MAIORCARADACIDADE-" + this.id);
+              sendMessage(this.socket, inet, node.port, "C-" + this.id);
             }
             this.coordinator = new SendMessage(this.id, this.ip, this.socket.getLocalPort());
             System.out.println("\nMaior cara da cidade: " +  this.id + "\n");
